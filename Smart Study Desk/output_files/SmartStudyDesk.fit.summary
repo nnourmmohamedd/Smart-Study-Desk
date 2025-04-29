@@ -1,0 +1,18 @@
+Fitter Status : Successful - Fri Dec 13 20:45:59 2024
+Quartus Prime Version : 20.1.1 Build 720 11/11/2020 SJ Lite Edition
+Revision Name : SmartStudyDesk
+Top-level Entity Name : SmartStudyDesk
+Family : MAX 10
+Device : 10M50DAF484C7G
+Timing Models : Final
+Total logic elements : 2,503 / 49,760 ( 5 % )
+    Total combinational functions : 2,499 / 49,760 ( 5 % )
+    Dedicated logic registers : 124 / 49,760 ( < 1 % )
+Total registers : 124
+Total pins : 22 / 360 ( 6 % )
+Total virtual pins : 0
+Total memory bits : 0 / 1,677,312 ( 0 % )
+Embedded Multiplier 9-bit elements : 0 / 288 ( 0 % )
+Total PLLs : 0 / 4 ( 0 % )
+UFM blocks : 0 / 1 ( 0 % )
+ADC blocks : 0 / 2 ( 0 % )

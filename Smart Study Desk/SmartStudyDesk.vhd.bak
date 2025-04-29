@@ -1,0 +1,111 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity SmartStudyDesk is
+    Port ( clk           : in  STD_LOGIC;       -- Clock signal
+           rst           : in  STD_LOGIC;       -- Reset signal
+           pir_sensor    : in  STD_LOGIC;       -- PIR sensor input
+           ldr_sensor    : in  STD_LOGIC;       -- LDR sensor input
+           servo_pwm     : out STD_LOGIC;       -- PWM output for servo motor
+           lamp_control  : out STD_LOGIC;       -- Lamp control signal
+           drawer_control : out STD_LOGIC;      -- Drawer control signal
+           time_display  : out STD_LOGIC_VECTOR(41 downto 0); -- 7-segment display (6 digits, 42 segments)
+           led           : out STD_LOGIC        -- LED output from FPGA
+           );
+end SmartStudyDesk;
+
+architecture Behavioral of SmartStudyDesk is
+    signal time_counter : integer := 0; -- Time counter for user presence
+    signal drawer_open  : boolean := false; -- Drawer open state
+    signal lamp_on      : boolean := false; -- Lamp on/off state
+    signal pir_detected : boolean := false; -- PIR detection status
+    signal ldr_detected : boolean := false; -- LDR detection status
+begin
+
+    -- Process to check PIR sensor and LDR
+    process(clk, rst)
+    begin
+        if rst = '0' then
+            time_counter <= 0;
+            drawer_open <= false;
+            lamp_on <= false;
+            pir_detected <= false;
+            ldr_detected <= false;
+        elsif rising_edge(clk) then
+            -- Detect PIR signal
+            if pir_sensor = '1' then
+                pir_detected <= true;
+            else
+                pir_detected <= false;
+            end if;
+
+            -- Detect LDR signal (low light intensity)
+            if ldr_sensor = '0' then
+                ldr_detected <= true; -- Low light detected
+            else
+                ldr_detected <= false;
+            end if;
+
+            -- Turn on lamp if LDR detects low light
+            if ldr_detected = true then
+                lamp_on <= true;
+            else
+                lamp_on <= false;
+            end if;
+
+            -- Control drawer opening for 10 seconds when PIR detects
+            if pir_detected = true and drawer_open = false then
+                drawer_open <= true; -- Open drawer
+                time_counter <= 0; -- Reset time counter
+            end if;
+
+            if drawer_open = true then
+                -- Increment time counter every second (simulated clock pulse)
+                if time_counter < 10 then
+                    time_counter <= time_counter + 1;
+                else
+                    drawer_open <= false; -- Close drawer after 10 seconds
+                end if;
+            end if;
+        end if;
+    end process;
+
+    -- Generate PWM for servo motor
+    process(clk)
+    variable pwm_counter : integer := 0;
+    begin
+        if rising_edge(clk) then
+            if pwm_counter < 1000000 then
+                pwm_counter := pwm_counter + 1;
+            else
+                pwm_counter := 0;
+                if drawer_open = true then
+                    servo_pwm <= '1'; -- Open drawer for 10 seconds
+                else
+                    servo_pwm <= '0'; -- Servo is at rest (closed)
+                end if;
+            end if;
+        end if;
+    end process;
+
+    -- Map time to 7-segment display
+    process(time_counter)
+    begin
+        -- Here, you would convert the time_counter into a 6-digit format and map to 7-segment segments
+        -- Example: Map time_counter (0 to 999999) to the 7-segment output
+        -- The segment assignments should be mapped based on your FPGA's wiring.
+        -- Use a case statement or function to convert numbers to segment values.
+    end process;
+
+    -- Control the lamp based on low light detection
+    lamp_control <= '1' when lamp_on = true else '0';
+
+    -- Control the drawer based on PIR sensor detection
+    drawer_control <= '1' when drawer_open = true else '0';
+
+    -- Set LED to indicate active operation
+    led <= '1'; -- LED active for any operation
+
+end Behavioral;
